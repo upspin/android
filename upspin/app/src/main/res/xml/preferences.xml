@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+        android:key="@string/username_key"
+        android:summary="Enter username (e.g. foo@bar.com)"
+        android:title="User Name" />
+
+    <EditTextPreference
+        android:ellipsize="middle"
+        android:key="@string/pubkey_key"
+        android:summary="Provide your public key"
+        android:title="Public Key" />
+
+    <EditTextPreference
+        android:key="@string/privkey_key"
+        android:summary="Provide your private key"
+        android:title="Private Key" />
+
+    <PreferenceScreen android:title="Servers">
+        <EditTextPreference
+            android:key="@string/userserver_key"
+            android:defaultValue="user.test.upspin.io:443"
+            android:title="User Server" />
+        <EditTextPreference
+            android:key="@string/storeserver_key"
+            android:defaultValue="store.test.upspin.io:443"
+            android:title="Store Server" />
+        <EditTextPreference
+            android:key="@string/dirserver_key"
+            android:defaultValue="directory.test.upspin.io:443"
+            android:title="Directory Server" />
+    </PreferenceScreen>
+</PreferenceScreen>
