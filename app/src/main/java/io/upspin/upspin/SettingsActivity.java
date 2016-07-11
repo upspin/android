@@ -1,20 +1,18 @@
+// Copyright 2016 The Upspin Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 package io.upspin.upspin;
-
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
-import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceScreen;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings.
@@ -71,7 +69,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         public void refresh() {
             setSummaryToValue(getString(R.string.username_key));
             setSummaryToValue(getString(R.string.pubkey_key));
-            setSummaryToValue(getString(R.string.userserver_key));
+            setSummaryToValue(getString(R.string.keyserver_key));
             setSummaryToValue(getString(R.string.storeserver_key));
             setSummaryToValue(getString(R.string.dirserver_key));
             String strPrivKeyKey = getString(R.string.privkey_key);

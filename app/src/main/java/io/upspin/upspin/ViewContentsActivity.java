@@ -1,21 +1,20 @@
+// Copyright 2016 The Upspin Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package io.upspin.upspin;
 
-import android.annotation.SuppressLint;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Base64;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 import android.webkit.WebView;
 
-import java.util.Locale;
-
 /**
+ * ViewContentsActivity is an Activity for handling opening of files.
  */
 public class ViewContentsActivity extends AppCompatActivity {
     // Constants used with Intent when starting this activity.

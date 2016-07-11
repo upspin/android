@@ -1,3 +1,6 @@
+// Copyright 2016 The Upspin Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 package io.upspin.upspin;
 
 import android.content.DialogInterface;
@@ -25,6 +28,9 @@ import go.gobind.Gobind.Client;
 import go.gobind.Gobind.ClientConfig;
 import go.gobind.Gobind.DirEntry;
 
+/**
+ * ListDir is an Activity for listing and navigating the contents of a user directory.
+ */
 public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEntryClick {
     private RecyclerView mRecyclerView;
     private DirEntryAdapter mAdapter;
@@ -83,7 +89,7 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
         String privKey = prefs.getString(getString(R.string.privkey_key), "").trim();
         String dirNetAddr = prefs.getString(getString(R.string.dirserver_key), "").trim();
         String storeNetAddr = prefs.getString(getString(R.string.storeserver_key), "").trim();
-        String userNetAddr = prefs.getString(getString(R.string.userserver_key), "").trim();
+        String userNetAddr = prefs.getString(getString(R.string.keyserver_key), "").trim();
 
         if (pubKey.length() > 0 && pubKey.charAt(pubKey.length() - 1) != '\n') {
             pubKey = pubKey + "\n";
@@ -94,7 +100,7 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
         cfg.setPrivateKey(privKey);
         cfg.setDirNetAddr(dirNetAddr);
         cfg.setStoreNetAddr(storeNetAddr);
-        cfg.setUserNetAddr(userNetAddr);
+        cfg.setKeyNetAddr(userNetAddr);
 
         return cfg;
     }
@@ -113,15 +119,9 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
             return;
         }
 
-        if (clientConfig == null) {
-            clientConfig = cfg;
-            // Fall through to refresh.
-        } else {
-            if (cfg.equals(clientConfig)) {
-                // No changes, no need to refresh.
-                return;
-            }
-            // Fall through to refresh.
+        if (clientConfig != null && cfg.equals(clientConfig)) {
+            // No changes, no need to refresh.
+            return;
         }
         refresh();
     }
@@ -207,6 +207,8 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
 
     private void refresh() {
         Log.i("Refresh", "Refreshing mobile client");
+
+        ClientConfig cfg = reloadPreferences();
 
         // This does not do networking operations hence it is suitable for the main thread.
         try {

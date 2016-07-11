@@ -18,8 +18,8 @@
 
     <PreferenceScreen android:title="Servers">
         <EditTextPreference
-            android:key="@string/userserver_key"
-            android:defaultValue="user.test.upspin.io:443"
+            android:key="@string/keyserver_key"
+            android:defaultValue="key.test.upspin.io:443"
             android:title="User Server" />
         <EditTextPreference
             android:key="@string/storeserver_key"
@@ -27,7 +27,7 @@
             android:title="Store Server" />
         <EditTextPreference
             android:key="@string/dirserver_key"
-            android:defaultValue="directory.test.upspin.io:443"
+            android:defaultValue="dir.test.upspin.io:443"
             android:title="Directory Server" />
     </PreferenceScreen>
 </PreferenceScreen>

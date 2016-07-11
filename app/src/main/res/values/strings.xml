@@ -12,7 +12,7 @@
     <string name="username_key">username</string>
     <string name="pubkey_key">pubkey</string>
     <string name="privkey_key">privkey</string>
-    <string name="userserver_key">userserver</string>
+    <string name="keyserver_key">keyserver</string>
     <string name="storeserver_key">storeserver</string>
     <string name="dirserver_key">dirserver</string>
 </resources>

@@ -1,25 +1,24 @@
+// Copyright 2016 The Upspin Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 package io.upspin.upspin;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
 import go.gobind.Gobind.DirEntry;
 
-
 /**
  * DirEntryAdapter is a recycler view adapter for displaying cards on the UI that contain directory
- * entries, that is, it shows the contents of a given directory.
+ * entries. That is, it shows the contents of a given directory.
  */
 public class DirEntryAdapter extends RecyclerView.Adapter<DirEntryAdapter.ViewHolder> implements View.OnClickListener {
     // Interface for sending click events to the users of this adapter. The click captures any
