@@ -208,7 +208,7 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
     private void refresh() {
         Log.i("Refresh", "Refreshing mobile client");
 
-        ClientConfig cfg = reloadPreferences();
+        clientConfig = reloadPreferences();
 
         // This does not do networking operations hence it is suitable for the main thread.
         try {
