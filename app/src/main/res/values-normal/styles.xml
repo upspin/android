@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="PathStyle">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="DateAndSize">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="ToolbarTitleTextExpanded" parent="TextAppearance.Design.CollapsingToolbar.Expanded">>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="ToolbarTitleTextCollapsed">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+</resources>

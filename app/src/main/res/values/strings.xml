@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Upspin</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="action_refresh">Refresh</string>
+
+    <string name="title_activity_view_contents">ViewContentsActivity</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="privkey_set">[private key set]</string>
+
+    <!-- Preference keys -->
+    <string name="username_key">username</string>
+    <string name="pubkey_key">pubkey</string>
+    <string name="privkey_key">privkey</string>
+    <string name="userserver_key">userserver</string>
+    <string name="storeserver_key">storeserver</string>
+    <string name="dirserver_key">dirserver</string>
+</resources>
