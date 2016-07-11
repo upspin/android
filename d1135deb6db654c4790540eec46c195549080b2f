@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba7a80a8_77f52a21",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 5020
+      },
+      "writtenOn": "2016-07-11T18:29:03Z",
+      "side": 1,
+      "message": "no need for the \u0027android\u0027 prefix here. it\u0027s already in the android repo.",
+      "revId": "d1135deb6db654c4790540eec46c195549080b2f",
+      "serverId": "0759ed4b-3fdc-34dc-866b-f2e708168c03",
+      "unresolved": false
+    }
+  ]
+}
