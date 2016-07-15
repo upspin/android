@@ -6,12 +6,17 @@ package io.upspin.upspin;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.OpenableColumns;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +28,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import go.gobind.Gobind;
 import go.gobind.Gobind.Client;
 import go.gobind.Gobind.ClientConfig;
@@ -32,12 +42,14 @@ import go.gobind.Gobind.DirEntry;
  * ListDir is an Activity for listing and navigating the contents of a user directory.
  */
 public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEntryClick {
+    private static final int OPEN_FILE_FROM_OTHER_APP = 1;
     private RecyclerView mRecyclerView;
     private DirEntryAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
     private Client mClient;
     private CollapsingToolbarLayout mToolbarLayout;
-    private ClientConfig clientConfig;
+    private ClientConfig mClientConfig;
+    private String mCurrDir;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +64,18 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Upload not implemented yet", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                // ACTION_GET_CONTENT is the intent to choose a file via the system's file
+                // browser.
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+
+                // Filter to only show results that can be "opened", such as a
+                // file (as opposed to a list of contacts or timezones)
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+                // Filter to show all files.
+                intent.setType("*/*");
+
+                startActivityForResult(intent, OPEN_FILE_FROM_OTHER_APP);
             }
         });
 
@@ -119,7 +141,7 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
             return;
         }
 
-        if (clientConfig != null && cfg.equals(clientConfig)) {
+        if (mClientConfig != null && cfg.equals(mClientConfig)) {
             // No changes, no need to refresh.
             return;
         }
@@ -147,7 +169,7 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
         int id = item.getItemId();
         switch (id) {
             case android.R.id.home:
-                String currDir = mToolbarLayout.getTitle().toString();
+                String currDir = getCurrDir();
                 int i = currDir.lastIndexOf("/");
                 navigateToDir(currDir.substring(0, i)); // This can't fail because back is disabled at the root.
                 break;
@@ -167,11 +189,17 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
         ActionBar b = getSupportActionBar();
         b.setDisplayShowTitleEnabled(true);
 
+        mCurrDir = currentDir;
         mToolbarLayout.setTitle(currentDir);
         // Disable or enable the back button depending whether we're at the root or not, respectively.
-        boolean backButton = !currentDir.equals(clientConfig.getUserName());
+        boolean backButton = !currentDir.equals(mClientConfig.getUserName());
         b.setDisplayHomeAsUpEnabled(backButton);
         b.setHomeButtonEnabled(backButton);
+    }
+
+    @Nullable
+    public String getCurrDir() {
+        return mCurrDir;
     }
 
     public void navigateToDir(final String dir) {
@@ -208,19 +236,24 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
     private void refresh() {
         Log.i("Refresh", "Refreshing mobile client");
 
-        clientConfig = reloadPreferences();
+        mClientConfig = reloadPreferences();
 
         // This does not do networking operations hence it is suitable for the main thread.
         try {
-            mClient = Gobind.NewClient(clientConfig);
+            mClient = Gobind.NewClient(mClientConfig);
         } catch (java.lang.Exception e) {
             showModalErrorMessage(e.getLocalizedMessage(), "Error Connecting Client");
             return;
         }
 
-        // List the contents of the user's root.
+        // List the contents of the user's current dir or root if none.
         if (mClient != null) {
-            navigateToDir(clientConfig.getUserName());
+            String currDir = getCurrDir();
+            if (currDir == null) {
+                navigateToDir(mClientConfig.getUserName());
+            } else {
+                navigateToDir(currDir);
+            }
         }
     }
 
@@ -268,5 +301,118 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
                 }
             }
         }.execute();
+    }
+
+    /**
+     * @param uri Uri from where to read the contents.
+     * @return All contents pointer to by the Uri.
+     */
+    private byte[] readAll(Uri uri) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            BufferedInputStream is = new BufferedInputStream(getContentResolver().openInputStream(uri));
+            // Read in chunks of 1MB.
+            byte[] data = new byte[1024 * 1024];
+            int n;
+            while (-1 != (n = is.read(data))) {
+                out.write(data, 0, n);
+            }
+        } catch (FileNotFoundException e) {
+            Snackbar.make(getCurrentFocus(),
+                    "Error in Open:" + e.getMessage(), Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            Log.e("Open", "error: " + e.getMessage());
+        } catch (IOException e) {
+            Snackbar.make(getCurrentFocus(),
+                    "Error in Read:" + e.getMessage(), Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            Log.e("Read", "error: " + e.getMessage());
+        }
+        return out.toByteArray();
+    }
+
+    /**
+     * @param uri The URI to check information for
+     * @return A pair with the URI's display name and size. iI size is unknown, -1 is returned.
+     */
+    private Pair<String, Long> getUriInfo(Uri uri) {
+        // The query, since it only applies to a single document, will only return
+        // one row. There's no need to filter, sort, or select fields, since we want
+        // all fields for one document.
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null, null);
+
+        Pair<String, Long> p = Pair.create("", -1L);
+        try {
+            // moveToFirst() returns false if the cursor has 0 rows.  Very handy for
+            // "if there's anything to look at, look at it" conditionals.
+            if (cursor != null && cursor.moveToFirst()) {
+                // This is provider-specific, and might not necessarily be a file name.
+                String displayName = cursor.getString(
+                        cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+
+                int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+                // If the size is unknown, the value stored is null.
+                // The storage API allows for remote files, whose size might not be locally known.
+                long size = -1L;
+                if (!cursor.isNull(sizeIndex)) {
+                    // Technically the column stores an int, but cursor.getString()
+                    // will do the conversion automatically.
+                    size = cursor.getLong(sizeIndex);
+                    p = Pair.create(displayName, size);
+                } else {
+                    p = Pair.create(displayName, -1L);
+                }
+            }
+        } finally {
+            cursor.close();
+        }
+        return p;
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        // The ACTION_GET_CONTENT intent was sent with the request code
+        // OPEN_FILE_FROM_OTHER_APP.
+        if (requestCode == OPEN_FILE_FROM_OTHER_APP && resultCode == AppCompatActivity.RESULT_OK) {
+            // The document selected by the user won't be returned in the intent.
+            // Instead, a URI to that document will be contained in the return intent
+            // provided to this method as a parameter.
+            if (resultData != null) {
+                final Uri uri = resultData.getData();
+                new AsyncTask<Void, Void, Void>() {
+                    private java.lang.Exception opException = null;
+
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        Pair<String, Long> metaData = getUriInfo(uri);
+                        // Re-create a filename in the current directory.
+                        String fname = getCurrDir() + "/" + metaData.first;
+                        // TODO: Use the size to choose between reading all into memory and the streaming API.
+                        byte[] data = readAll(uri);
+                        try {
+                            String ref = mClient.Put(fname, data);
+                            Log.i("ListDir.Put", "ref: " + ref + " fname:" + fname);
+                        } catch (Exception e) {
+                            opException = e;
+                            Log.e("ListDir.Put", "error: " + e.getMessage());
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public void onPostExecute(Void voids) {
+                        if (opException != null) {
+                            Snackbar.make(getCurrentFocus(),
+                                    "Error in Put:" + opException.getMessage(), Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        } else {
+                            // Issue a "soft" refresh (without restarting the client).
+                            navigateToDir(getCurrDir());
+                        }
+                    }
+                }.execute();
+            }
+        }
     }
 }

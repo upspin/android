@@ -16,4 +16,4 @@
 #   public *;
 #}
 
--keep public class go.droidspin.** { *; }
+-keep public class go.gobind.** { *; }
