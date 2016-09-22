@@ -220,15 +220,13 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
 
             @Override
             public void onPostExecute(DirEntry entry) {
-                if (entry != null) {
-                    mAdapter.showEntries(dir, entry);
-                    setCurrentDir(dir);
-                } else {
-                    if (opException != null) {
-                        Snackbar.make(getCurrentFocus(), "Error in Glob:" + opException.getMessage(),
-                                Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                    }
+                if (opException != null) {
+                    Snackbar.make(getCurrentFocus(), "Error in Glob:" + opException.getMessage(),
+                            Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                    return;
                 }
+                mAdapter.showEntries(dir, entry);
+                setCurrentDir(dir);
             }
         }.execute();
     }
