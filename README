@@ -12,7 +12,7 @@ https://developer.android.com/studio/index.html
   + Tools > Android > SDK Manager
 
 - Build go bindings for Android:
-  + cd $GOPATH/src/upspin.io/client/gobind
+  + cd $GOPATH/src/upspin.io/exp/client/gobind
   + go generate
 
 - Import the .aar created in the step above:
