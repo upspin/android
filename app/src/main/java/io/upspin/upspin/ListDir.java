@@ -33,10 +33,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import go.gobind.Gobind;
-import go.gobind.Gobind.Client;
-import go.gobind.Gobind.ClientConfig;
-import go.gobind.Gobind.DirEntry;
+import gobind.Client;
+import gobind.ClientConfig;
+import gobind.DirEntry;
 
 /**
  * ListDir is an Activity for listing and navigating the contents of a user directory.
@@ -116,7 +115,7 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
         if (pubKey.length() > 0 && pubKey.charAt(pubKey.length() - 1) != '\n') {
             pubKey = pubKey + "\n";
         }
-        ClientConfig cfg = Gobind.NewClientConfig();
+        ClientConfig cfg = new ClientConfig();
         cfg.setUserName(userName);
         cfg.setPublicKey(pubKey);
         cfg.setPrivateKey(privKey);
@@ -210,7 +209,7 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
             protected DirEntry doInBackground(Void... params) {
                 DirEntry entry = null;
                 try {
-                    entry = mClient.Glob(dir + "/*");
+                    entry = mClient.glob(dir + "/*");
                 } catch (java.lang.Exception e) {
                     opException = e;
                     return null;
@@ -238,7 +237,7 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
 
         // This does not do networking operations hence it is suitable for the main thread.
         try {
-            mClient = Gobind.NewClient(mClientConfig);
+            mClient = new Client(mClientConfig);
         } catch (java.lang.Exception e) {
             showModalErrorMessage(e.getLocalizedMessage(), "Error Connecting Client");
             return;
@@ -256,7 +255,7 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
     }
 
     @Override
-    public void onClick(Gobind.DirEntry de) {
+    public void onClick(DirEntry de) {
         if (de.getIsDir()) {
             navigateToDir(de.getName());
         } else {
@@ -273,7 +272,7 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
                 // TODO: show a spinner while loading.
                 byte[] data = null;
                 try {
-                    data = mClient.Get(fullFilename);
+                    data = mClient.get(fullFilename);
                 } catch (java.lang.Exception e) {
                     opException = e;
                     return null;
@@ -389,7 +388,7 @@ public class ListDir extends AppCompatActivity implements DirEntryAdapter.DirEnt
                         // TODO: Use the size to choose between reading all into memory and the streaming API.
                         byte[] data = readAll(uri);
                         try {
-                            String ref = mClient.Put(fname, data);
+                            String ref = mClient.put(fname, data);
                             Log.i("ListDir.Put", "ref: " + ref + " fname:" + fname);
                         } catch (Exception e) {
                             opException = e;

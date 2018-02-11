@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-import go.gobind.Gobind.DirEntry;
+import gobind.DirEntry;
 
 /**
  * DirEntryAdapter is a recycler view adapter for displaying cards on the UI that contain directory
